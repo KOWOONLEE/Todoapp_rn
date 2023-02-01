@@ -1,5 +1,6 @@
 import { StatusBar } from "expo-status-bar";
-import { useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -14,6 +15,8 @@ import {
 } from "react-native";
 import { theme } from "./colors";
 
+const STORAGE_KEY = "@toDos";
+
 export default function App() {
   const [working, setWorking] = useState(true);
   const [saveText, setSaveText] = useState("");
@@ -27,20 +30,37 @@ export default function App() {
   const onChangeTextEvent = (payload) => {
     setSaveText(payload);
   };
-  const addToDo = () => {
+
+  const saveToDos = async (toSave) => {
+    // value는 string밖에 안돼서 바꿔주는 작업
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+  };
+
+  const loadToDos = async () => {
+    const s = await AsyncStorage.getItem(STORAGE_KEY);
+    //string을 object로 만들어줌
+    setToDos(JSON.parse(s));
+  };
+
+  useEffect(() => {
+    loadToDos();
+  }, []);
+
+  const addToDo = async () => {
     if (saveText.length === 0) {
       return;
     }
     // const newToDos = Object.assign({}, toDos, {
-    //   [Date.now()]: { saveText, work: working },
+    //   [Date.now()]: { saveText, working },
     // });
     //3개의 object를 결합하기 위해 Object.assign 사용
     //먼저 비어있는 object 결합,다음 이전 todo를 새로운 todo와 합침
-    const newToDos = { ...toDos, [Date.now()]: { saveText, work: working } };
+    const newToDos = { ...toDos, [Date.now()]: { saveText, working } };
     setToDos(newToDos);
+    await saveToDos(newToDos);
     setSaveText("");
   };
-  console.log(toDos);
+
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
@@ -76,11 +96,13 @@ export default function App() {
         />
       </View>
       <ScrollView>
-        {Object.keys(toDos).map((key) => (
-          <View style={styles.toDo} key={key}>
-            <Text style={styles.toDoText}>{toDos[key].saveText}</Text>
-          </View>
-        ))}
+        {Object.keys(toDos).map((key) =>
+          toDos[key].working === working ? (
+            <View style={styles.toDo} key={key}>
+              <Text style={styles.toDoText}>{toDos[key].saveText}</Text>
+            </View>
+          ) : null
+        )}
       </ScrollView>
     </View>
   );
