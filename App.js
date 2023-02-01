@@ -5,6 +5,7 @@ import {
   Text,
   View,
   TextInput,
+  ScrollView,
   TouchableOpacity,
   TouchableHighlight, //배경 하이라이트
   TouchableWithoutFeedback, //ui 변동사항 없음
@@ -16,6 +17,7 @@ import { theme } from "./colors";
 export default function App() {
   const [working, setWorking] = useState(true);
   const [saveText, setSaveText] = useState("");
+  const [toDos, setToDos] = useState({});
   const handleTravel = () => {
     setWorking(false);
   };
@@ -25,6 +27,20 @@ export default function App() {
   const onChangeTextEvent = (payload) => {
     setSaveText(payload);
   };
+  const addToDo = () => {
+    if (saveText.length === 0) {
+      return;
+    }
+    // const newToDos = Object.assign({}, toDos, {
+    //   [Date.now()]: { saveText, work: working },
+    // });
+    //3개의 object를 결합하기 위해 Object.assign 사용
+    //먼저 비어있는 object 결합,다음 이전 todo를 새로운 todo와 합침
+    const newToDos = { ...toDos, [Date.now()]: { saveText, work: working } };
+    setToDos(newToDos);
+    setSaveText("");
+  };
+  console.log(toDos);
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
@@ -51,12 +67,21 @@ export default function App() {
         <TextInput
           onChangeText={onChangeTextEvent}
           value={saveText}
+          onSubmitEditing={addToDo}
+          returnKeyLabel="done"
           placeholder={
             working ? "Add to do" : "What do you want to do on a travel?"
           }
           style={styles.input}
         />
       </View>
+      <ScrollView>
+        {Object.keys(toDos).map((key) => (
+          <View style={styles.toDo} key={key}>
+            <Text style={styles.toDoText}>{toDos[key].saveText}</Text>
+          </View>
+        ))}
+      </ScrollView>
     </View>
   );
 }
@@ -83,7 +108,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
     marginTop: 20,
+    marginVertical: 20,
     borderRadius: 20,
-    fontSize: 18,
+    fontSize: 16,
+  },
+  toDo: {
+    backgroundColor: theme.toDoBg,
+    marginBottom: 20,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+  },
+  toDoText: {
+    color: "white",
+    fontSize: 15,
   },
 });
