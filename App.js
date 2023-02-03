@@ -37,9 +37,13 @@ export default function App() {
   };
 
   const loadToDos = async () => {
-    const s = await AsyncStorage.getItem(STORAGE_KEY);
-    //string을 object로 만들어줌
-    setToDos(JSON.parse(s));
+    try {
+      const s = await AsyncStorage.getItem(STORAGE_KEY);
+      //string을 object로 만들어줌
+      setToDos(JSON.parse(s));
+    } catch {
+      console.log("에러가 발생했습니다.");
+    }
   };
 
   useEffect(() => {
