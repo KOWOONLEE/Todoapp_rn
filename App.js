@@ -1,10 +1,12 @@
 import { StatusBar } from "expo-status-bar";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { EvilIcons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
   View,
+  Alert,
   TextInput,
   ScrollView,
   TouchableOpacity,
@@ -65,6 +67,23 @@ export default function App() {
     setSaveText("");
   };
 
+  const deleteToDo = (key) => {
+    Alert.alert("Delete to do?", "Are you sure?", [
+      {
+        text: "cancel",
+      },
+      {
+        text: "OK",
+        onPress: async () => {
+          const newToDos = { ...toDos };
+          delete newToDos[key];
+          setToDos(newToDos);
+          await saveToDos(newToDos);
+        },
+      },
+    ]);
+    return;
+  };
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
@@ -104,6 +123,13 @@ export default function App() {
           toDos[key].working === working ? (
             <View style={styles.toDo} key={key}>
               <Text style={styles.toDoText}>{toDos[key].saveText}</Text>
+              <TouchableOpacity
+                onPress={() => {
+                  deleteToDo(key);
+                }}
+              >
+                <EvilIcons name="trash" size={24} color="white" />
+              </TouchableOpacity>
             </View>
           ) : null
         )}
@@ -139,6 +165,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   toDo: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     backgroundColor: theme.toDoBg,
     marginBottom: 20,
     paddingVertical: 5,
