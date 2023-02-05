@@ -1,5 +1,7 @@
 import { StatusBar } from "expo-status-bar";
+import * as ImagePicker from "expo-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import BouncyCheckbox from "react-native-bouncy-checkbox";
 import { EvilIcons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import {
@@ -7,6 +9,8 @@ import {
   Text,
   View,
   Alert,
+  Image,
+  Button,
   TextInput,
   ScrollView,
   TouchableOpacity,
@@ -23,6 +27,10 @@ export default function App() {
   const [working, setWorking] = useState(true);
   const [saveText, setSaveText] = useState("");
   const [toDos, setToDos] = useState({});
+  const [modified, setModified] = useState(false);
+  const [isChecked, setIsChecked] = useState(false);
+  const [image, setImage] = useState(null);
+
   const handleTravel = () => {
     setWorking(false);
   };
@@ -56,16 +64,30 @@ export default function App() {
     if (saveText.length === 0) {
       return;
     }
-    // const newToDos = Object.assign({}, toDos, {
-    //   [Date.now()]: { saveText, working },
-    // });
-    //3개의 object를 결합하기 위해 Object.assign 사용
-    //먼저 비어있는 object 결합,다음 이전 todo를 새로운 todo와 합침
-    const newToDos = { ...toDos, [Date.now()]: { saveText, working } };
+    const newToDos = {
+      ...toDos,
+      [Date.now()]: { saveText, working, modified },
+    };
     setToDos(newToDos);
     await saveToDos(newToDos);
     setSaveText("");
   };
+
+  // const pickImage = async () => {
+  //   //권한 요청
+  //   let result = await ImagePicker.launchImageLibraryAsync({
+  //     mediaTypes: ImagePicker.MediaTypeOptions.All,
+  //     allowsEditing: true,
+  //     aspect: [4, 3],
+  //     quality: 1,
+  //   });
+
+  //   console.log(result);
+
+  //   if (!result.canceled) {
+  //     setImage(result.assets[0].uri);
+  //   }
+  // };
 
   const deleteToDo = (key) => {
     Alert.alert("Delete to do?", "Are you sure?", [
@@ -84,6 +106,15 @@ export default function App() {
     ]);
     return;
   };
+
+  const modifiedToDo = async (key) => {
+    const newToDos = { ...toDos };
+    newToDos[key] = { modified: true };
+    console.log(modified);
+    setToDos(newToDos);
+    await saveToDos(newToDos);
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
@@ -122,7 +153,46 @@ export default function App() {
         {Object.keys(toDos).map((key) =>
           toDos[key].working === working ? (
             <View style={styles.toDo} key={key}>
+              <BouncyCheckbox
+                size={20}
+                // text={toDos[key].saveText}
+                iconStyle={{ borderRadius: 0 }}
+                fillColor="pink"
+                innerIconStyle={{
+                  borderRadius: 0,
+                }}
+                isChecked={isChecked}
+                textStyle={{
+                  color: isChecked ? theme.grey : "white",
+                  marginLeft: 30,
+                }}
+                // onPress={(isChecked) => {
+                //   !isChecked;
+                // }}
+              />
               <Text style={styles.toDoText}>{toDos[key].saveText}</Text>
+              {/* <View
+                style={{
+                  flex: 1,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Button title="이미지 첨부하기" onPress={pickImage} />
+                {image && (
+                  <Image
+                    source={{ uri: image }}
+                    style={{ width: 200, height: 200 }}
+                  />
+                )}
+              </View> */}
+              <TouchableOpacity
+                onPress={() => {
+                  modifiedToDo(key);
+                }}
+              >
+                <Text>수정</Text>
+              </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => {
                   deleteToDo(key);
@@ -170,12 +240,23 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     backgroundColor: theme.toDoBg,
     marginBottom: 20,
-    paddingVertical: 5,
+    paddingVertical: 15,
     paddingHorizontal: 10,
     borderRadius: 5,
+  },
+  toDoTextL: {
+    color: theme.grey,
+    fontSize: 15,
+    textDecorationLine: "line-through",
   },
   toDoText: {
     color: "white",
     fontSize: 15,
+  },
+  colorgrey: {
+    color: theme.grey,
+  },
+  colorwhite: {
+    color: "white",
   },
 });
