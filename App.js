@@ -14,10 +14,6 @@ import {
   TextInput,
   ScrollView,
   TouchableOpacity,
-  TouchableHighlight, //배경 하이라이트
-  TouchableWithoutFeedback, //ui 변동사항 없음
-  Pressable, //위에꺼랑 비슷하지만 길게 누르기 기능이 새로 있음
-  // hitSlope 어디까지 누를 것인가 설정
 } from "react-native";
 import { theme } from "./colors";
 
@@ -66,7 +62,7 @@ export default function App() {
     }
     const newToDos = {
       ...toDos,
-      [Date.now()]: { saveText, working, modified },
+      [Date.now()]: { saveText, working },
     };
     setToDos(newToDos);
     await saveToDos(newToDos);
@@ -108,11 +104,12 @@ export default function App() {
   };
 
   const modifiedToDo = async (key) => {
+    setModified(!modified);
     const newToDos = { ...toDos };
-    newToDos[key] = { modified: true };
-    console.log(modified);
+    newToDos[key] = { modified };
     setToDos(newToDos);
     await saveToDos(newToDos);
+    console.log(toDos);
   };
 
   return (
@@ -155,7 +152,6 @@ export default function App() {
             <View style={styles.toDo} key={key}>
               <BouncyCheckbox
                 size={20}
-                // text={toDos[key].saveText}
                 iconStyle={{ borderRadius: 0 }}
                 fillColor="pink"
                 innerIconStyle={{
@@ -166,9 +162,7 @@ export default function App() {
                   color: isChecked ? theme.grey : "white",
                   marginLeft: 30,
                 }}
-                // onPress={(isChecked) => {
-                //   !isChecked;
-                // }}
+                onPress={modifiedToDo}
               />
               <Text style={styles.toDoText}>{toDos[key].saveText}</Text>
               {/* <View
@@ -186,12 +180,8 @@ export default function App() {
                   />
                 )}
               </View> */}
-              <TouchableOpacity
-                onPress={() => {
-                  modifiedToDo(key);
-                }}
-              >
-                <Text>수정</Text>
+              <TouchableOpacity onPress={() => {}}>
+                <Text style={styles.toDoText}>{toDos[key].modified}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => {
