@@ -24,7 +24,6 @@ export default function App() {
   const [saveText, setSaveText] = useState("");
   const [toDos, setToDos] = useState({});
   const [modified, setModified] = useState(false);
-  const [isChecked, setIsChecked] = useState(false);
   const [image, setImage] = useState(null);
 
   const handleTravel = () => {
@@ -105,11 +104,11 @@ export default function App() {
 
   const modifiedToDo = async (key) => {
     setModified(!modified);
-    const newToDos = { ...toDos };
-    newToDos[key] = { modified };
-    setToDos(newToDos);
-    await saveToDos(newToDos);
-    console.log(toDos);
+    // const newToDos = { ...toDos };
+    // newToDos[key] = { saveText, working, modified };
+    // setToDos(newToDos);
+    // await saveToDos(newToDos);
+    // console.log(toDos);
   };
 
   return (
@@ -157,15 +156,22 @@ export default function App() {
                 innerIconStyle={{
                   borderRadius: 0,
                 }}
-                isChecked={isChecked}
+                isChecked={modified}
                 textStyle={{
-                  color: isChecked ? theme.grey : "white",
+                  color: modified ? theme.grey : "white",
                   marginLeft: 30,
                 }}
-                onPress={modifiedToDo}
+                onPress={() => {
+                  setModified(!modified);
+                }}
               />
-              <Text style={styles.toDoText}>{toDos[key].saveText}</Text>
-              {/* <View
+              <Text
+                value={modified}
+                style={modified ? styles.toDoText : styles.toDoTextL}
+              >
+                {toDos[key].saveText}
+              </Text>
+              {/* <Viewㄷ
                 style={{
                   flex: 1,
                   alignItems: "center",
